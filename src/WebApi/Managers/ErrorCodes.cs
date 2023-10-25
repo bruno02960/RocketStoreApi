@@ -17,6 +17,11 @@
         /// </summary>
         public const string InexistentCustomer = "InexistentCustomer";
 
+        /// <summary>
+        /// There was an error requesting information from PositionStack-API.
+        /// </summary>
+        public const string ErrorRequestingFromPositionStackAPI = "ErrorRequestingFromPositionStackAPI";
+
         #endregion
     }
 }

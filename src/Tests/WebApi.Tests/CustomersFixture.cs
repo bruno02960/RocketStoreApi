@@ -92,6 +92,21 @@ namespace RocketStoreApi.Tests
                 .ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Send a delete request.
+        /// </summary>
+        /// <param name="endpointPath">The endpoint path.</param>
+        /// <param name="id">The customer identifier.</param>
+        /// <returns>
+        /// The <see cref="Task{TResult}"/> that represents the asynchronous operation.
+        /// The <see cref="HttpResponseMessage"/> instance.
+        /// </returns>
+        public Task<HttpResponseMessage> DeleteAsync(string endpointPath, string id)
+        {
+            return this.Client.DeleteAsync(
+                new Uri($"{this.Server.BaseAddress}{endpointPath}/{id}"));
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {

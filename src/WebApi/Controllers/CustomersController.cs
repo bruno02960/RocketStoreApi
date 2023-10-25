@@ -119,6 +119,17 @@ namespace RocketStoreApi.Controllers
                     });
             }
 
+            if (result.FailedWith(ErrorCodes.ErrorRequestingFromPositionStackAPI))
+            {
+                return this.BadRequest(
+                    new ProblemDetails()
+                    {
+                        Status = (int)HttpStatusCode.NotFound,
+                        Title = result.ErrorCode,
+                        Detail = result.ErrorDescription
+                    });
+            }
+
             return this.Ok(result.Value);
         }
 

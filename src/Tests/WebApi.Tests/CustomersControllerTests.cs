@@ -219,6 +219,29 @@ namespace RocketStoreApi.Tests
             httpResponse.Headers.Location.Should().NotBeNull();
         }
 
+        /// <summary>
+        /// Tests the <see cref="CustomersController.DeleteCustomerByIdAsync(string)"/> method
+        /// to ensure that it fails stating inexistent customer.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that represents the asynchronous operation.
+        /// </returns>
+        [Fact]
+        public async Task DeleteFailsAsync()
+        {
+            // Arrange
+
+            string id = "fc2ea358-8767-4d37-98d6-6333b5df9124";
+
+            // Act
+
+            HttpResponseMessage httpResponse = await this.fixture.DeleteAsync("api/customers", id).ConfigureAwait(false);
+
+            // Assert
+
+            httpResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+
         #endregion
     }
 }

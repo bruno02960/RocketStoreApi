@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -120,6 +122,29 @@ namespace RocketStoreApi.Managers
             }
 
             DTOs.CustomerDetails customer = this.Mapper.Map<Entities.Customer, DTOs.CustomerDetails>(customerEntity);
+
+            HttpClient httpClient = new HttpClient();
+
+            Uri uri = new Uri($"http://api.positionstack.com/v1/forward?access_key=391703115f999012be6c2e91a89496be&query={customer.Address}");
+            HttpResponseMessage response = await httpClient.GetAsync(uri).ConfigureAwait(false);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                customer.Location = JsonSerializer.Deserialize<DTOs.LocationResult>(content).Data[0];
+
+                httpClient.Dispose();
+            }
+            else
+            {
+                this.Logger.LogWarning($"Error requesting geolocation information from PositionStack-API.");
+
+                httpClient.Dispose();
+
+                return Result<CustomerDetails>.Failure(
+                    ErrorCodes.ErrorRequestingFromPositionStackAPI,
+                    $"Error requesting geolocation information from PositionStack-API.");
+            }
 
             this.Logger.LogInformation($"Customer list retrieved successfully.");
 
