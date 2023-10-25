@@ -1,0 +1,7 @@
+The consideration about using Clean Architecture should take into account the complexity and expected development time of the project in question, and it should preferably be used only in projects where maintenance needs to be ensured for a long time, and scalability is a requirement.
+
+Clean Architecture promotes a more modular structure, making the solution easier to maintain, test, and modify.
+
+A solution that follows Clean Architecture is structured into four projects. One represents the API interface that the user interacts with / sends requests to (Presentation Layer), while the other three correspond to the application, domain, and infrastructure layers, each with specific responsibilities.
+
+In the case of the presented solution, in addition to separating responsibilities across these three layers, which would represent a more significant change, some smaller-scale changes could also be made. One of these changes would be the removal of data annotations. In their place, we would use Fluent API, or Fluent Validation for data annotations that represent validation. The use of DTOs would be kept, but their location in the project's file system would be made closer to the file that includes the code of the specific request on which it is used, in the application layer. Custom error codes could be replaced and/or supplemented with the use of custom domain exceptions.

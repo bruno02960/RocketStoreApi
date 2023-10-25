@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.Http;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -38,6 +36,11 @@ namespace RocketStoreApi.Managers
             get;
         }
 
+        private IPositionStackGateway PositionStackGateway
+        {
+            get;
+        }
+
         #endregion
 
         #region Constructors
@@ -48,11 +51,13 @@ namespace RocketStoreApi.Managers
         /// <param name="context">The context.</param>
         /// <param name="mapper">The mapper.</param>
         /// <param name="logger">The logger.</param>
-        public CustomersManager(ApplicationDbContext context, IMapper mapper, ILogger<CustomersManager> logger)
+        /// <param name="positionStackGateway">The PositionStack-API gateway.</param>
+        public CustomersManager(ApplicationDbContext context, IMapper mapper, ILogger<CustomersManager> logger, IPositionStackGateway positionStackGateway)
         {
             this.Context = context;
             this.Mapper = mapper;
             this.Logger = logger;
+            this.PositionStackGateway = positionStackGateway;
         }
 
         #endregion
@@ -123,30 +128,18 @@ namespace RocketStoreApi.Managers
 
             DTOs.CustomerDetails customer = this.Mapper.Map<Entities.Customer, DTOs.CustomerDetails>(customerEntity);
 
-            HttpClient httpClient = new HttpClient();
+            Result<LocationResultData> locationResult = await this.PositionStackGateway.SendForwardGeocodingRequestAsync(customer.Address).ConfigureAwait(false);
 
-            Uri uri = new Uri($"http://api.positionstack.com/v1/forward?access_key=391703115f999012be6c2e91a89496be&query={customer.Address}");
-            HttpResponseMessage response = await httpClient.GetAsync(uri).ConfigureAwait(false);
-
-            if (response.IsSuccessStatusCode)
+            if (locationResult.FailedWith(ErrorCodes.ErrorRequestingFromPositionStackAPI))
             {
-                string content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                customer.Location = JsonSerializer.Deserialize<DTOs.LocationResult>(content).Data[0];
-
-                httpClient.Dispose();
-            }
-            else
-            {
-                this.Logger.LogWarning($"Error requesting geolocation information from PositionStack-API.");
-
-                httpClient.Dispose();
-
                 return Result<CustomerDetails>.Failure(
                     ErrorCodes.ErrorRequestingFromPositionStackAPI,
-                    $"Error requesting geolocation information from PositionStack-API.");
+                    $"Couldn't find any customer with id equal to '{id}'.");
             }
 
-            this.Logger.LogInformation($"Customer list retrieved successfully.");
+            customer.Location = locationResult.Value;
+
+            this.Logger.LogInformation($"Customer details retrieved successfully.");
 
             return Result<DTOs.CustomerDetails>.Success(customer);
         }
