@@ -74,6 +74,7 @@ namespace RocketStoreApi.Controllers
         /// </returns>
         [HttpGet("api/customers")]
         [ProducesResponseType(typeof(List<DTOs.CustomerList>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetCustomersAsync([FromQuery] string nameFilter = null, [FromQuery] string emailFilter = null)
         {
             Result<List<DTOs.CustomerList>> result = await this.HttpContext.RequestServices.GetRequiredService<ICustomersManager>()
@@ -101,6 +102,7 @@ namespace RocketStoreApi.Controllers
         /// The customer with the given identifier.
         /// </returns>
         [HttpGet("/api/customers/{id}")]
+        [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(CustomerDetails), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetCustomerByIdAsync([FromRoute] string id)

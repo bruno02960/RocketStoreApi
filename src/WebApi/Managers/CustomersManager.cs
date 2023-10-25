@@ -97,12 +97,12 @@ namespace RocketStoreApi.Managers
 
             List<DTOs.CustomerList> customers = this.Mapper.Map<List<Entities.Customer>, List<DTOs.CustomerList>>(customerEntities);
 
-            if (nameFilter != null)
+            if (string.IsNullOrEmpty(nameFilter))
             {
                 customers = customers.Where(x => x.Name.Contains(nameFilter, StringComparison.InvariantCulture)).ToList();
             }
 
-            if (emailFilter != null)
+            if (string.IsNullOrEmpty(emailFilter))
             {
                 customers = customers.Where(x => x.EmailAddress.Contains(emailFilter, StringComparison.InvariantCulture)).ToList();
             }
